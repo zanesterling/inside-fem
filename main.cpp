@@ -3,19 +3,20 @@
 #include <iostream>
 #include <sstream>
 
+template<typename T>
 struct Matrix {
 	std::size_t width;
 	std::size_t height;
-	std::unique_ptr<double[]> data;
+	std::unique_ptr<T[]> data;
 
 	Matrix(std::size_t width, std::size_t height) : width(width), height(height) {
 		this->data = std::make_unique<double[]>(width * height);
 		for (std::size_t i = 0; i < width * height; i++) {
-			this->data[i] = 0.0;
+			this->data[i] = 0;
 		}
 	}
 
-	double get(std::size_t x, std::size_t y) {
+	T get(std::size_t x, std::size_t y) {
 		if (x > width || y > height) {
 			throw std::format(
 				"Matrix::get({}, {}) invalid on matrix with w={}, h={}",
@@ -25,7 +26,7 @@ struct Matrix {
 		return this->data[x + y*this->width];
 	}
 
-	void set(std::size_t x, std::size_t y, double val) {
+	void set(std::size_t x, std::size_t y, T val) {
 		if (x > width || y > height) {
 			throw std::format(
 				"Matrix::get({}, {}) invalid on matrix with w={}, h={}",
@@ -45,7 +46,7 @@ struct Matrix {
 		}
 	}
 
-	Matrix operator*(Matrix& other) {
+	Matrix<T> operator*(Matrix<T>& other) {
 		if (this->width != other.height) {
 			std::ostringstream left;
 			this->print(left);
@@ -58,11 +59,11 @@ struct Matrix {
 			);
 		}
 
-		Matrix out(other.width, this->height);
+		Matrix<T> out(other.width, this->height);
 		// TODO: Make this smarter.
 		for (std::size_t y = 0; y < this->height; y++) {
 			for (std::size_t x = 0; x < other.width; x++) {
-				double val = 0.0;
+				T val = 0;
 				for (std::size_t z = 0; z < this->width; z++) {
 					val += this->get(z, y) * other.get(x, z);
 				}
@@ -74,25 +75,25 @@ struct Matrix {
 };
 
 int main(int argv, char** args) {
-	Matrix identity(2, 2);
+	Matrix<double> identity(2, 2);
 	identity.set(0, 0, 1.0);
 	identity.set(1, 1, 1.0);
 	std::cout << "identity" << std::endl;
 	identity.print(std::cout);
 	std::cout << std::endl; 
 
-	Matrix scale(2, 2);
+	Matrix<double> scale(2, 2);
 	scale.set(0, 0, 2.0);
 	scale.set(1, 1, 2.0);
 	std::cout << "scale" << std::endl;
 	scale.print(std::cout);
 	std::cout << std::endl; 
 
-	Matrix product1 = identity * scale;
+	Matrix<double> product1 = identity * scale;
 	std::cout << "identity * scale" << std::endl;
 	product1.print(std::cout);
 	std::cout << std::endl; 
-	Matrix product2 = scale * identity;
+	Matrix<double> product2 = scale * identity;
 	std::cout << "scale * identity" << std::endl;
 	product2.print(std::cout);
 	std::cout << std::endl; 
